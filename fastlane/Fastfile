@@ -1,0 +1,208 @@
+update_fastlane
+
+fastlane_version "2.26.1"
+
+default_platform :ios
+
+platform :ios do
+  before_all do
+    xcode_select ENV["DEVELOPER_DIR"]
+    cocoapods
+    ENV['FASTLANE_DONT_STORE_PASSWORD']="1" # dont store pw in keychain
+  end
+
+  lane :staging do
+    ENV['FASTLANE_PASSWORD']=ENV['STAGING_APPLE_ID_PASSWORD']
+
+    match(
+      git_url: ENV['CERTS_GIT_URL'],
+      type: "enterprise"
+    )
+
+    pem(
+      development: true, # default false
+      generate_p12: true,
+      force: false,
+      save_private_key: false, # default true
+      output_path: "./fastlane",
+      p12_password: ENV['STAGING_P12_PASSWORD']
+    )
+
+    cert(
+      username: CredentialsManager::AppfileConfig.try_fetch_value(:apple_id),
+      team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
+      team_name: CredentialsManager::AppfileConfig.try_fetch_value(:team_name),
+      output_path: "./fastlane",
+      development: true,
+    )
+
+    sigh(
+      skip_install: false,
+      app_identifier: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      username: CredentialsManager::AppfileConfig.try_fetch_value(:apple_id),
+      team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
+      cert_id: ENV['STAGING_CERT_ID'],
+      platform: "ios",
+      output_path: "./fastlane",
+      # development: true,
+      # force: true, # uncomment to recreate provisioning profile on build
+
+      # skip_fetch_profiles: false,
+      # skip_certificate_verification: false,
+      # adhoc: false,
+      # ignore_profiles_with_different_name: false,
+    )
+
+    ## NOTE: comment `update_settings_bundle` functions below if no Settings.bundle
+    update_settings_bundle(
+      key: "appVersion",
+      value: ":version (:build)",
+      target: ENV["STAGING_SCHEME"]
+    )
+
+    update_settings_bundle(
+      key: "buildTimestamp",
+      value: Time.now.strftime('%a, %e %b %Y %H:%M %p'),
+      target: ENV["STAGING_SCHEME"]
+    )
+
+    gym(
+      scheme: ENV['STAGING_SCHEME'],
+      workspace: ENV['STAGING_WORKSPACE'],
+      output_name: ENV['STAGING_OUTPUT_NAME'],
+      clean: true,
+      output_directory: ".",
+      silent: false,
+      buildlog_path: "~/Library/Logs/gym",
+      # export_method: "development",
+
+      # destination: "generic/platform=iOS",
+      # use_legacy_build_api: "false",
+    )
+
+    aws_s3(
+      # All of these are used to make Shenzhen's `ipa distribute:s3` command
+      access_key: ENV['STAGING_S3_ACCESS_KEY'],
+      secret_access_key: ENV['STAGING_S3_SECRET_ACCESS_KEY'],
+      bucket: ENV['STAGING_S3_BUCKET'],
+      region: ENV['STAGING_S3_REGION'],
+      ipa: ENV['STAGING_IPA'],                     # Required (if not uploading an APK).
+      app_directory: ENV['STAGING_APP_DIRECTORY'], # Optional but nice if you want to put multiple apps in same bucket
+      path: '',                                    # default will create alot of files: 'v{CFBundleShortVersionString}_b{CFBundleVersion}/'
+
+      # upload_metadata: true,                     # Upload version.json, plist and HTML. Set to false to skip uploading of these files.
+      # version_file_name: 'app_version.json',     # Name of the file to upload to S3. Defaults to 'version.json'
+      # version_template_path: 'path/to/erb'       # Path to an ERB to configure the structure of the version JSON file
+      # apk: 'AppName.apk',                        # Required (if not uploading an IPA).
+      # dsym: 'AppName.app.dSYM.zip',              # Optional is you use `ipa` to build.
+    )
+
+    # pilot
+
+    slack(
+      message: "#{ENV['SLACK_MENTION']} new *STAGING* build *#{Time.now.strftime('%a, %e %b %Y %H:%M %p')}* @ https://www.codigo.co/codigo-builds/#{ENV['STAGING_APP_DIRECTORY']}/index.html",
+      channel: ENV['SLACK_CHANNEL']
+    )
+  end
+
+  lane :uat do
+    ENV['FASTLANE_PASSWORD']=ENV['UAT_APPLE_ID_PASSWORD']
+
+    match(
+      git_url: ENV['CERTS_GIT_URL'],
+      type: "enterprise"
+    )
+
+    pem(
+      development: true, # default false
+      generate_p12: true,
+      force: false,
+      save_private_key: false, # default true
+      output_path: "./fastlane",
+      p12_password: ENV['UAT_P12_PASSWORD']
+    )
+
+    cert(
+      username: CredentialsManager::AppfileConfig.try_fetch_value(:apple_id),
+      team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
+      team_name: CredentialsManager::AppfileConfig.try_fetch_value(:team_name),
+      output_path: "./fastlane",
+      development: true,
+    )
+
+    sigh(
+      skip_install: false,
+      app_identifier: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      username: CredentialsManager::AppfileConfig.try_fetch_value(:apple_id),
+      team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
+      cert_id: ENV['UAT_CERT_ID'],
+      platform: "ios",
+      output_path: "./fastlane",
+      # development: true,
+      # force: true, # uncomment to recreate provisioning profile on build
+
+      # skip_fetch_profiles: false,
+      # skip_certificate_verification: false,
+      # adhoc: false,
+      # ignore_profiles_with_different_name: false,
+    )
+
+    ## NOTE: comment `update_settings_bundle` functions below if no Settings.bundle
+    update_settings_bundle(
+      key: "appVersion",
+      value: ":version (:build)",
+      target: ENV["UAT_SCHEME"]
+    )
+
+    update_settings_bundle(
+      key: "buildTimestamp",
+      value: Time.now.strftime('%a, %e %b %Y %H:%M %p'),
+      target: ENV["UAT_SCHEME"]
+    )
+
+    gym(
+      scheme: ENV['UAT_SCHEME'],
+      workspace: ENV['UAT_WORKSPACE'],
+      output_name: ENV['UAT_OUTPUT_NAME'],
+      clean: true,
+      output_directory: ".",
+      silent: false,
+      buildlog_path: "~/Library/Logs/gym",
+      # export_method: "development",
+
+      # destination: "generic/platform=iOS",
+      # use_legacy_build_api: "false",
+    )
+
+    aws_s3(
+      # All of these are used to make Shenzhen's `ipa distribute:s3` command
+      access_key: ENV['UAT_S3_ACCESS_KEY'],
+      secret_access_key: ENV['UAT_S3_SECRET_ACCESS_KEY'],
+      bucket: ENV['UAT_S3_BUCKET'],
+      region: ENV['UAT_S3_REGION'],
+      ipa: ENV['UAT_IPA'],                     # Required (if not uploading an APK).
+      app_directory: ENV['UAT_APP_DIRECTORY'], # Optional but nice if you want to put multiple apps in same bucket
+      path: '',                                    # default will create alot of files: 'v{CFBundleShortVersionString}_b{CFBundleVersion}/'
+
+      # upload_metadata: true,                     # Upload version.json, plist and HTML. Set to false to skip uploading of these files.
+      # version_file_name: 'app_version.json',     # Name of the file to upload to S3. Defaults to 'version.json'
+      # version_template_path: 'path/to/erb'       # Path to an ERB to configure the structure of the version JSON file
+      # apk: 'AppName.apk',                        # Required (if not uploading an IPA).
+      # dsym: 'AppName.app.dSYM.zip',              # Optional is you use `ipa` to build.
+    )
+
+    # pilot
+
+    slack(
+      message: "#{ENV['SLACK_MENTION']} new *UAT* build *#{Time.now.strftime('%a, %e %b %Y %H:%M %p')}* @ https://www.codigo.co/codigo-builds/#{ENV['UAT_APP_DIRECTORY']}/index.html",
+      channel: ENV['SLACK_CHANNEL']
+    )
+  end
+
+  error do |lane, exception|
+    # slack(
+    #   message: exception.message,
+    #   success: false
+    # )
+  end
+end
