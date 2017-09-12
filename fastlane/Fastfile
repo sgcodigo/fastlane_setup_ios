@@ -11,17 +11,31 @@ platform :ios do
     ENV['FASTLANE_DONT_STORE_PASSWORD']="1" # dont store pw in keychain
   end
 
-  ["staging", "uat"].each do |env|
+  ["staging", "uat", "production"].each do |env|
     lane env.to_sym do
       ENV['FASTLANE_PASSWORD']=ENV["#{env.upcase}_APPLE_ID_PASSWORD"]
 
+      if env == "production"
+        increment_build_number
+      end
+
       match(
-        git_url: ENV['CERTS_GIT_URL'],
-        type: "enterprise"
+        git_url: ENV["#{env.upcase}_CERTS_GIT_URL"],
+        git_branch: ENV["#{env.upcase}_CERTS_GIT_BRANCH"],
+        type: ENV["#{env.upcase}_MATCH_TYPE"]
+      )
+
+      produce(
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+        skip_itc: ENV["#{env.upcase}_SKIP_ITC"] == "#{env.upcase}_SKIP_ITC", # return boolean
+        language: "English", # TODO make this dynamic?
+        company_name: ENV["#{env.upcase}_COMPANY_NAME"],
+        app_name: ENV["#{env.upcase}_APP_NAME"],
       )
 
       pem(
-        development: true, # default false
+        development: ENV["#{env.upcase}_PUSH_NOTIFICATION_ENV"] == "true", # return boolean
         generate_p12: true,
         force: false,
         save_private_key: false, # default true
@@ -72,7 +86,7 @@ platform :ios do
         workspace: ENV["#{env.upcase}_WORKSPACE"],
         output_name: ENV["#{env.upcase}_OUTPUT_NAME"],
         clean: true,
-        output_directory: ".",
+        output_directory: "./",
         silent: false,
         buildlog_path: "~/Library/Logs/gym",
         # export_method: "development",
@@ -81,29 +95,66 @@ platform :ios do
         # use_legacy_build_api: "false",
       )
 
-      aws_s3(
-        # All of these are used to make Shenzhen's `ipa distribute:s3` command
-        access_key: ENV["#{env.upcase}_S3_ACCESS_KEY"],
-        secret_access_key: ENV["#{env.upcase}_S3_SECRET_ACCESS_KEY"],
-        bucket: ENV["#{env.upcase}_S3_BUCKET"],
-        region: ENV["#{env.upcase}_S3_REGION"],
-        ipa: ENV["#{env.upcase}_IPA"],                     # Required (if not uploading an APK).
-        app_directory: ENV["#{env.upcase}_APP_DIRECTORY"], # Optional but nice if you want to put multiple apps in same bucket
-        path: '',                                    # default will create alot of files: 'v{CFBundleShortVersionString}_b{CFBundleVersion}/'
+      if env == "production"
+        deliver(
+          app_identifier:                         ENV["#{env.upcase}_APP_IDENTIFIER"],
+          username:                               ENV["#{env.upcase}_APPLE_ID"],
+          ipa:                                    ENV["#{env.upcase}_IPA"],
+          platform:                               "ios",
+          force:                                  true,
+          skip_binary_upload:                     true, # testflight will do the upload of the binary
 
-        # upload_metadata: true,                     # Upload version.json, plist and HTML. Set to false to skip uploading of these files.
-        # version_file_name: 'app_version.json',     # Name of the file to upload to S3. Defaults to 'version.json'
-        # version_template_path: 'path/to/erb'       # Path to an ERB to configure the structure of the version JSON file
-        # apk: 'AppName.apk',                        # Required (if not uploading an IPA).
-        # dsym: 'AppName.app.dSYM.zip',              # Optional is you use `ipa` to build.
-      )
+          automatic_release:                      ENV["#{env.upcase}_AUTOMATIC_RELEASE"] == "true",
+          submit_for_review:                      ENV["#{env.upcase}_SUBMIT_FOR_REVIEW"] == "true",
+          skip_app_version_update:                ENV["#{env.upcase}_SKIP_APP_VERSION_UPDATE"] == "true",
+          skip_screenshots:                       ENV["#{env.upcase}_SKIP_SCREENSHOTS"] == "true",
+          skip_metadata:                          ENV["#{env.upcase}_SKIP_METADATA"] == "true",
+          overwrite_screenshots:                  ENV["#{env.upcase}_OVERWRITE_SCREENSHOTS"] == "true",
+          submit_for_review:                      ENV["#{env.upcase}_SUBMIT_FOR_REVIEW"] == "true",
 
-      # pilot
+          # app_version:                          "1.0",
+          # run_precheck_before_submit:           true,
+          # ignore_language_directory_validation: false,
+          # precheck_default_rule_level:          "warn",
+          # edit_live:                            false,
+        )
 
-      slack(
-        message: "#{ENV['SLACK_MENTION']} new *#{env.upcase}* build *#{Time.now.strftime('%a, %e %b %Y %H:%M %p')}* @ https://www.codigo.co/codigo-builds/#{ENV["#{env.upcase}_APP_DIRECTORY"]}/index.html",
-        channel: ENV['SLACK_CHANNEL']
-      )
+        pilot
+      else
+        aws_s3(
+          # All of these are used to make Shenzhen's `ipa distribute:s3` command
+          access_key: ENV["#{env.upcase}_S3_ACCESS_KEY"],
+          secret_access_key: ENV["#{env.upcase}_S3_SECRET_ACCESS_KEY"],
+          bucket: ENV["#{env.upcase}_S3_BUCKET"],
+          region: ENV["#{env.upcase}_S3_REGION"],
+          ipa: ENV["#{env.upcase}_IPA"],                     # Required (if not uploading an APK).
+          app_directory: ENV["#{env.upcase}_APP_DIRECTORY"], # Optional but nice if you want to put multiple apps in same bucket
+          path: '',                                    # default will create alot of files: 'v{CFBundleShortVersionString}_b{CFBundleVersion}/'
+
+          # upload_metadata: true,                     # Upload version.json, plist and HTML. Set to false to skip uploading of these files.
+          # version_file_name: 'app_version.json',     # Name of the file to upload to S3. Defaults to 'version.json'
+          # version_template_path: 'path/to/erb'       # Path to an ERB to configure the structure of the version JSON file
+          # apk: 'AppName.apk',                        # Required (if not uploading an IPA).
+          # dsym: 'AppName.app.dSYM.zip',              # Optional is you use `ipa` to build.
+        )
+      end
+
+      if env == "production"
+        crashlytics(
+          api_token: ENV["PRODUCTION_CRASHLYTICS_API_TOKEN"],
+          build_secret: ENV["PRODUCTION_CRASHLYTICS_BUILD_TOKEN"],
+        )
+
+        slack(
+          message: "#{ENV['SLACK_MENTION']} new *#{env.upcase}* build pushed to TestFlight  *#{Time.now.strftime('%a, %e %b %Y %H:%M %p')}*",
+          channel: ENV['SLACK_CHANNEL']
+        )
+      else
+        slack(
+          message: "#{ENV['SLACK_MENTION']} new *#{env.upcase}* build *#{Time.now.strftime('%a, %e %b %Y %H:%M %p')}* @ https://www.codigo.co/codigo-builds/#{ENV["#{env.upcase}_APP_DIRECTORY"]}/index.html",
+          channel: ENV['SLACK_CHANNEL']
+        )
+      end
     end
   end
 
