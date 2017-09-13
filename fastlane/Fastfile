@@ -28,7 +28,7 @@ platform :ios do
       produce(
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
-        skip_itc: ENV["#{env.upcase}_SKIP_ITC"] == "#{env.upcase}_SKIP_ITC", # return boolean
+        skip_itc: ENV["#{env.upcase}_SKIP_ITC"] == "true", # return boolean
         language: "English", # TODO make this dynamic?
         company_name: ENV["#{env.upcase}_COMPANY_NAME"],
         app_name: ENV["#{env.upcase}_APP_NAME"],
