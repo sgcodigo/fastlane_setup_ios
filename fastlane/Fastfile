@@ -19,12 +19,6 @@ platform :ios do
         increment_build_number
       end
 
-      match(
-        git_url: ENV["#{env.upcase}_CERTS_GIT_URL"],
-        git_branch: ENV["#{env.upcase}_CERTS_GIT_BRANCH"],
-        type: ENV["#{env.upcase}_MATCH_TYPE"]
-      )
-
       produce(
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
@@ -32,6 +26,12 @@ platform :ios do
         language: "English", # TODO make this dynamic?
         company_name: ENV["#{env.upcase}_COMPANY_NAME"],
         app_name: ENV["#{env.upcase}_APP_NAME"],
+      )
+
+      match(
+        git_url: ENV["#{env.upcase}_CERTS_GIT_URL"],
+        git_branch: ENV["#{env.upcase}_CERTS_GIT_BRANCH"],
+        type: ENV["#{env.upcase}_MATCH_TYPE"]
       )
 
       pem(
