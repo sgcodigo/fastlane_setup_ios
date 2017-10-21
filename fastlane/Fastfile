@@ -17,6 +17,9 @@ platform :ios do
 
       if env == "production"
         increment_build_number
+        increment_version_number(
+          # bump_type: "patch" # default increase patch number
+        )
       end
 
       produce(

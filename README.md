@@ -8,6 +8,7 @@ All the files, except `.env.sample` are meant to be copied and pasted into the p
 
 * Updates Fastlane gem version every time any lane is executed.
 * Auto increment App version number meant for tracking app version used for testing during UAT.
+* Auto increment App **build** and **version** number for appstore (production) build
 * Pings to codigogroup's Slack account when any lane has completed. Channel and Project Manager to ping to can be configured in `.env` file.
 * Uploads to Codigo's AWS account where the ipa are stored for easy download via a standard url.
 
