@@ -35,3 +35,8 @@ Copy the `fastlane` folder into your root project directory.
 Copy `Gemfile` file into your root project directory.
 
 Copy `Settings.bundle` folder into your project's workspace directory.
+
+## Known errors
+
+* `fastlane produce` will throw error: `User doesn't have enough permission for the following action: user_details_data`
+* First time gym will throw error

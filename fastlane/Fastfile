@@ -22,19 +22,22 @@ platform :ios do
         )
       end
 
-      produce(
-        username: ENV["#{env.upcase}_APPLE_ID"],
-        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
-        skip_itc: ENV["#{env.upcase}_SKIP_ITC"] == "true", # return boolean
-        language: "English", # TODO make this dynamic?
-        company_name: ENV["#{env.upcase}_COMPANY_NAME"],
-        app_name: ENV["#{env.upcase}_APP_NAME"],
-      )
+      #### NOTE: to be run on first time only, else will have error `User doesn't have enough permission for the following action: user_details_data`
+      # produce(
+      #   username: ENV["#{env.upcase}_APPLE_ID"],
+      #   app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+      #   skip_itc: ENV["#{env.upcase}_SKIP_ITC"] == "#{env.upcase}_SKIP_ITC", # return boolean
+      #   language: "English", # TODO make this dynamic?
+      #   company_name: ENV["#{env.upcase}_TEAM_NAME"],
+      #   app_name: ENV["#{env.upcase}_APP_NAME"],
+      # )
 
       match(
         git_url: ENV["#{env.upcase}_CERTS_GIT_URL"],
         git_branch: ENV["#{env.upcase}_CERTS_GIT_BRANCH"],
-        type: ENV["#{env.upcase}_MATCH_TYPE"]
+        type: ENV["#{env.upcase}_MATCH_TYPE"],
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
       )
 
       pem(
@@ -43,22 +46,24 @@ platform :ios do
         force: false,
         save_private_key: false, # default true
         output_path: "./fastlane",
-        p12_password: ENV["#{env.upcase}_P12_PASSWORD"]
+        p12_password: ENV["#{env.upcase}_P12_PASSWORD"],
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
       )
 
       cert(
-        username: CredentialsManager::AppfileConfig.try_fetch_value(:apple_id),
-        team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
-        team_name: CredentialsManager::AppfileConfig.try_fetch_value(:team_name),
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        team_id: ENV["#{env}_TEAM_ID"],
+        team_name: ENV["#{env}_TEAM_NAME"],
         output_path: "./fastlane",
         development: true,
       )
 
       sigh(
         skip_install: false,
-        app_identifier: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
-        username: CredentialsManager::AppfileConfig.try_fetch_value(:apple_id),
-        team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
+        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        team_id: ENV["#{env}_TEAM_ID"],
         cert_id: ENV["#{env.upcase}_CERT_ID"],
         platform: "ios",
         output_path: "./fastlane",
@@ -71,18 +76,18 @@ platform :ios do
         # ignore_profiles_with_different_name: false,
       )
 
-      ## NOTE: comment `update_settings_bundle` functions below if no Settings.bundle
-      update_settings_bundle(
-        key: "appVersion",
-        value: ":version (:build)",
-        target: ENV["#{env.upcase}_SCHEME"]
-      )
+      #### NOTE: comment `update_settings_bundle` functions below if no Settings.bundle
+      # update_settings_bundle(
+      #   key: "appVersion",
+      #   value: ":version (:build)",
+      #   target: ENV["#{env.upcase}_SCHEME"]
+      # )
 
-      update_settings_bundle(
-        key: "buildTimestamp",
-        value: Time.now.strftime('%a, %e %b %Y %H:%M %p'),
-        target: ENV["#{env.upcase}_SCHEME"]
-      )
+      # update_settings_bundle(
+      #   key: "buildTimestamp",
+      #   value: Time.now.strftime('%a, %e %b %Y %H:%M %p'),
+      #   target: ENV["#{env.upcase}_SCHEME"]
+      # )
 
       gym(
         scheme: ENV["#{env.upcase}_SCHEME"],
