@@ -58,6 +58,7 @@ platform :ios do
         development: true,
       )
 
+      # provisioning profile for debug (development: true)
       sigh(
         skip_install: false,
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
@@ -66,7 +67,25 @@ platform :ios do
         cert_id: ENV["#{env.upcase}_CERT_ID"],
         platform: "ios",
         output_path: "./fastlane",
-        # development: true,
+        development: true,
+        # force: true, # uncomment to recreate provisioning profile on build
+
+        # skip_fetch_profiles: false,
+        # skip_certificate_verification: false,
+        # adhoc: false,
+        # ignore_profiles_with_different_name: false,
+      )
+
+      # provisioning profile for release (development: false)
+      sigh(
+        skip_install: false,
+        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        team_id: ENV["#{env}_TEAM_ID"],
+        cert_id: ENV["#{env.upcase}_CERT_ID"],
+        platform: "ios",
+        output_path: "./fastlane",
+        development: false,
         # force: true, # uncomment to recreate provisioning profile on build
 
         # skip_fetch_profiles: false,
