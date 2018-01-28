@@ -1,0 +1,2 @@
+https://docs.fastlane.tools/actions/deliver/
+View all available categories, languages, etc.
