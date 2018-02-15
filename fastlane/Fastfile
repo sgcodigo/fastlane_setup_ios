@@ -136,7 +136,6 @@ platform :ios do
           skip_screenshots:                       ENV["#{env.upcase}_SKIP_SCREENSHOTS"] == "true",
           skip_metadata:                          ENV["#{env.upcase}_SKIP_METADATA"] == "true",
           overwrite_screenshots:                  ENV["#{env.upcase}_OVERWRITE_SCREENSHOTS"] == "true",
-          submit_for_review:                      ENV["#{env.upcase}_SUBMIT_FOR_REVIEW"] == "true",
 
           # app_version:                          "1.0",
           # run_precheck_before_submit:           true,
