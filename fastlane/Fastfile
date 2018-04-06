@@ -110,6 +110,7 @@ platform :ios do
       gym(
         scheme: ENV["#{env.upcase}_SCHEME"],
         workspace: ENV["#{env.upcase}_WORKSPACE"],
+        # project: ENV["#{env.upcase}_PROJECT"], # use this if not using cocoapods
         output_name: ENV["#{env.upcase}_OUTPUT_NAME"],
         clean: true,
         output_directory: "./",
