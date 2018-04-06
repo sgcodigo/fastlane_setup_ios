@@ -62,7 +62,6 @@ Carthage/Build
 # https://docs.fastlane.tools/best-practices/source-control/#source-control
 
 fastlane/*
-!Appfile
 !Fastfile
 !Pluginfile
 !.env.sample
