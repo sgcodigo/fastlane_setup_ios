@@ -29,6 +29,7 @@ platform :ios do
         language: "English", # TODO make this dynamic?
         company_name: ENV["#{env.upcase}_TEAM_NAME"],
         app_name: ENV["#{env.upcase}_APP_NAME"],
+        team_id: ENV["#{env.upcase}_TEAM_ID"],
       )
 
       match(
