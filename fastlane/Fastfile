@@ -50,6 +50,7 @@ platform :ios do
         p12_password: ENV["#{env.upcase}_P12_PASSWORD"],
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+        team_id: ENV["#{env.upcase}_TEAM_ID"],
       )
 
       #### NOTE: comment `update_settings_bundle` functions below if no Settings.bundle
