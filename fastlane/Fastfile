@@ -30,6 +30,7 @@ platform :ios do
         company_name: ENV["#{env.upcase}_TEAM_NAME"],
         app_name: ENV["#{env.upcase}_APP_NAME"],
         team_id: ENV["#{env.upcase}_TEAM_ID"],
+        itc_team_id: ENV["#{env.upcase}_ITC_TEAM_ID"],
       )
 
       match(
