@@ -104,7 +104,17 @@ platform :ios do
           # edit_live:                            false,
         )
 
-        pilot
+        pilot(
+          username: ENV["#{env.upcase}_APPLE_ID"],
+          app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+          app_platform: "ios",
+          ipa: ENV["#{env.upcase}_IPA"],
+          team_id: ENV["#{env.upcase}_ITC_TEAM_ID"],
+          team_name: ENV["#{env.upcase}_COMPANY_NAME"],
+
+          skip_submission:                      ENV["#{env.upcase}_SKIP_SUBMISSION"] == "true",
+          skip_waiting_for_build_processing:                      ENV["#{env.upcase}_WAIT_PROCESS"] == "true",
+        )
       else
         aws_s3(
           # All of these are used to make Shenzhen's `ipa distribute:s3` command
