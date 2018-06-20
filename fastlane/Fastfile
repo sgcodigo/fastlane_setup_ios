@@ -11,6 +11,16 @@ platform :ios do
     ENV['FASTLANE_DONT_STORE_PASSWORD']="1" # dont store pw in keychain
   end
 
+  desc "Increments all scheme's build number referencing from 1 scheme"
+  lane :bump_build_number do
+    increment_build_number()
+  end
+
+  desc "Increments all scheme's version number referencing from 1 scheme"
+  lane :bump_version_number do
+    increment_version_number()
+  end
+
   ["staging", "uat", "production"].each do |env|
     lane env.to_sym do
       ENV['FASTLANE_PASSWORD']=ENV["#{env.upcase}_APPLE_ID_PASSWORD"]
