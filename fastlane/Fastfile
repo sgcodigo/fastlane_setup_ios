@@ -32,13 +32,6 @@ platform :ios do
     lane env.to_sym do
       ENV['FASTLANE_PASSWORD']=ENV["#{env.upcase}_APPLE_ID_PASSWORD"]
 
-      if env == "production"
-        increment_build_number
-        increment_version_number(
-          # bump_type: "patch" # default increase patch number
-        )
-      end
-
       produce(
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
