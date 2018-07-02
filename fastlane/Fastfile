@@ -4,13 +4,11 @@ fastlane_version "2.26.1"
 
 default_platform :ios
 
-platform :ios do
-  before_all do
-    xcode_select ENV["DEVELOPER_DIR"]
-    cocoapods
-    ENV['FASTLANE_DONT_STORE_PASSWORD']="1" # dont store pw in keychain
-  end
+before_all do
+  xcode_select ENV["DEVELOPER_DIR"]
+end
 
+platform :ios do
   desc "Increments all scheme's build number referencing from 1 scheme"
   lane :bump_build_number do
     increment_build_number()
@@ -18,7 +16,16 @@ platform :ios do
 
   desc "Increments all scheme's version number referencing from 1 scheme"
   lane :bump_version_number do
-    increment_version_number()
+    increment_version_number(
+      # bump_type: "patch" # default increase patch number
+    )
+  end
+end
+
+platform :ios do
+  before_all do
+    cocoapods
+    ENV['FASTLANE_DONT_STORE_PASSWORD']="1" # dont store pw in keychain
   end
 
   ["staging", "uat", "production"].each do |env|
