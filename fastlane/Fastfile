@@ -52,7 +52,7 @@ platform :ios do
       )
 
       pem(
-        development: ENV["#{env.upcase}_PUSH_NOTIFICATION_ENV"] == "true", # return boolean
+        development: ENV["#{env.upcase}_PUSH_NOTIFICATION_DEV_ENV"] == "true", # return boolean
         generate_p12: true,
         force: false,
         save_private_key: false, # default true
