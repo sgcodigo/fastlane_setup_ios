@@ -65,3 +65,4 @@ fastlane/*
 !Fastfile
 !Pluginfile
 !.env.sample
+!fastlane/metadata
