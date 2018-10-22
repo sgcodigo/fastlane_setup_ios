@@ -108,6 +108,7 @@ platform :ios do
           overwrite_screenshots: ENV["#{env.upcase}_OVERWRITE_SCREENSHOTS"] == "true",
           precheck_include_in_app_purchases: ENV["#{env.upcase}_PRECHECK_INCLUDE_IN_APP_PURCHASES"] == "true",
           app_rating_config_path: './fastlane/metadata/itunes_rating_config.json', # refer to https://dev.to/jessachandler/setting-up-fastlane-when-you-dont-know-what-you-are-doing--1bph
+          app_icon: './fastlane/metadata/appicon.png',
 
           # app_version:                          "1.0",
           # run_precheck_before_submit:           true,
