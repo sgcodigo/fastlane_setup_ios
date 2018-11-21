@@ -32,6 +32,10 @@ platform :ios do
     lane env.to_sym do
       ENV['FASTLANE_PASSWORD']=ENV["#{env.upcase}_APPLE_ID_PASSWORD"]
 
+      # output everything in fastlane directory for easy management
+      output_path = './fastlane'
+      output_name = ENV["#{env.upcase}_OUTPUT_NAME"]
+
       produce(
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
@@ -66,7 +70,7 @@ platform :ios do
         generate_p12: true,
         force: false,
         save_private_key: false, # default true
-        output_path: "./fastlane",
+        output_path: output_path,
         p12_password: ENV["#{env.upcase}_P12_PASSWORD"],
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
@@ -90,9 +94,9 @@ platform :ios do
         scheme: ENV["#{env.upcase}_SCHEME"],
         workspace: ENV["#{env.upcase}_WORKSPACE"],
         # project: ENV["#{env.upcase}_PROJECT"], # use this if not using cocoapods
-        output_name: ENV["#{env.upcase}_OUTPUT_NAME"],
+        output_name: output_name,
         clean: true,
-        output_directory: "./",
+        output_directory: output_path,
         silent: false,
         buildlog_path: "~/Library/Logs/gym",
         # export_method: "development",
@@ -131,7 +135,7 @@ platform :ios do
           username: ENV["#{env.upcase}_APPLE_ID"],
           app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
           app_platform: "ios",
-          ipa: ENV["#{env.upcase}_IPA"],
+          ipa: "#{output_path}/#{output_name}.ipa",
           team_id: ENV["#{env.upcase}_ITC_TEAM_ID"],
           team_name: ENV["#{env.upcase}_COMPANY_NAME"],
 
@@ -145,15 +149,15 @@ platform :ios do
           secret_access_key: ENV["#{env.upcase}_S3_SECRET_ACCESS_KEY"],
           bucket: ENV["#{env.upcase}_S3_BUCKET"],
           region: ENV["#{env.upcase}_S3_REGION"],
-          ipa: ENV["#{env.upcase}_IPA"],                     # Required (if not uploading an APK).
+          ipa: "#{output_path}/#{output_name}.ipa", # Required (if not uploading an APK).
           app_directory: ENV["#{env.upcase}_APP_DIRECTORY"], # Optional but nice if you want to put multiple apps in same bucket
-          path: '',                                    # default will create alot of files: 'v{CFBundleShortVersionString}_b{CFBundleVersion}/'
+          path: '', # default will create alot of files: 'v{CFBundleShortVersionString}_b{CFBundleVersion}/'
 
-          # upload_metadata: true,                     # Upload version.json, plist and HTML. Set to false to skip uploading of these files.
-          # version_file_name: 'app_version.json',     # Name of the file to upload to S3. Defaults to 'version.json'
-          # version_template_path: 'path/to/erb'       # Path to an ERB to configure the structure of the version JSON file
-          # apk: 'AppName.apk',                        # Required (if not uploading an IPA).
-          # dsym: 'AppName.app.dSYM.zip',              # Optional is you use `ipa` to build.
+          # upload_metadata: true, # Upload version.json, plist and HTML. Set to false to skip uploading of these files.
+          # version_file_name: 'app_version.json', # Name of the file to upload to S3. Defaults to 'version.json'
+          # version_template_path: 'path/to/erb' # Path to an ERB to configure the structure of the version JSON file
+          # apk: 'AppName.apk', # Required (if not uploading an IPA).
+          # dsym: 'AppName.app.dSYM.zip', # Optional is you use `ipa` to build.
         )
       end
 
