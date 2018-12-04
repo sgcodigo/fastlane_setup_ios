@@ -48,6 +48,18 @@ platform :ios do
         itc_team_id: ENV["#{env.upcase}_ITC_TEAM_ID"]
       )
 
+      pem(
+        development: ENV["#{env.upcase}_PUSH_NOTIFICATION_DEV_ENV"] == 'true',
+        generate_p12: true,
+        force: false,
+        save_private_key: false, # default true
+        output_path: output_path,
+        p12_password: ENV["#{env.upcase}_P12_PASSWORD"],
+        username: ENV["#{env.upcase}_APPLE_ID"],
+        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
+        team_id: ENV["#{env.upcase}_TEAM_ID"]
+      )
+
       if env != 'production'
         match(
           git_url: ENV["#{env.upcase}_CERTS_GIT_URL"],
@@ -64,18 +76,6 @@ platform :ios do
         type: ENV["#{env.upcase}_MATCH_TYPE"],
         username: ENV["#{env.upcase}_APPLE_ID"],
         app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"]
-      )
-
-      pem(
-        development: ENV["#{env.upcase}_PUSH_NOTIFICATION_DEV_ENV"] == 'true',
-        generate_p12: true,
-        force: false,
-        save_private_key: false, # default true
-        output_path: output_path,
-        p12_password: ENV["#{env.upcase}_P12_PASSWORD"],
-        username: ENV["#{env.upcase}_APPLE_ID"],
-        app_identifier: ENV["#{env.upcase}_APP_IDENTIFIER"],
-        team_id: ENV["#{env.upcase}_TEAM_ID"]
       )
 
       ## uncomment `update_settings_bundle` Settings.bundle present
