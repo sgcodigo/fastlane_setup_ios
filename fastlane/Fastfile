@@ -61,6 +61,7 @@ platform :ios do
       )
 
       if env != 'production'
+        # create cert for release build too to build on device
         match(
           git_url: ENV["#{env.upcase}_CERTS_GIT_URL"],
           git_branch: ENV["#{env.upcase}_CERTS_GIT_BRANCH"],
